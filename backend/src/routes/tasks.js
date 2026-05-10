@@ -28,7 +28,7 @@ router.post('/:projectId/tasks', authMiddleware, async (req, res) => {
   }
 });
 
-router.patch('/tasks/:taskId', authMiddleware, async (req, res) => {
+router.patch('/:taskId', authMiddleware, async (req, res) => {
   try {
     const { title, description, status, assigneeId, dueDate, priority } = req.body;
     const task = await prisma.task.update({
@@ -44,8 +44,18 @@ router.patch('/tasks/:taskId', authMiddleware, async (req, res) => {
       include: { assignee: { select: { id: true, name: true, email: true } } }
     });
     res.json(task);
-  } catch {
-    res.status(500).json({ error: 'Server error' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.delete('/:taskId', authMiddleware, async (req, res) => {
+  try {
+    await prisma.task.delete({ where: { id: req.params.taskId } });
+    res.json({ message: 'Task deleted' });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
   }
 });
 
