@@ -12,8 +12,8 @@ router.post('/:projectId/tasks', authMiddleware, async (req, res) => {
     const task = await prisma.task.create({
       data: {
         title,
-        description,
-        assigneeId,
+        description: description || null,
+        assigneeId: assigneeId || null,
         priority: priority || 'MEDIUM',
         dueDate: dueDate ? new Date(dueDate) : null,
         projectId: req.params.projectId,
@@ -22,8 +22,9 @@ router.post('/:projectId/tasks', authMiddleware, async (req, res) => {
       include: { assignee: { select: { id: true, name: true, email: true } } }
     });
     res.json(task);
-  } catch {
-    res.status(500).json({ error: 'Server error' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
   }
 });
 

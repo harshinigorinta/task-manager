@@ -23,14 +23,24 @@ export default function ProjectDetail() {
   const myRole = project?.members?.find(m => m.user.id === user?.id)?.role;
 
   const handleCreateTask = async (e) => {
-    e.preventDefault();
-    try {
-      await createTask(id, taskForm);
-      setTaskForm({ title: '', description: '', assigneeId: '', dueDate: '', priority: 'MEDIUM' });
-      setShowTaskForm(false);
-      load();
-    } catch { setError('Failed to create task'); }
-  };
+  e.preventDefault();
+  setError('');
+  try {
+    const payload = {
+      title: taskForm.title,
+      description: taskForm.description || undefined,
+      assigneeId: taskForm.assigneeId || undefined,
+      priority: taskForm.priority,
+      dueDate: taskForm.dueDate || undefined
+    };
+    await createTask(id, payload);
+    setTaskForm({ title: '', description: '', assigneeId: '', dueDate: '', priority: 'MEDIUM' });
+    setShowTaskForm(false);
+    load();
+  } catch (err) {
+    setError(err.response?.data?.error || 'Failed to create task');
+  }
+};
 
   const handleStatusChange = async (taskId, status) => {
     try { await updateTask(taskId, { status }); load(); } catch {}
